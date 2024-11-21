@@ -29,8 +29,9 @@ create_items() {
   local TMP=$(mktemp) APP
   for APP in $@; do
     [ $APP = "Xprogs" -o $APP = "Wprogs" ] && continue
+    grep -q "${APP}.*<!--labwc-->" $TCEMENU && continue
     printf '<item label=\x22%s\x22><action name=\x22Execute\x22 ' $APP >> $TMP
-    printf 'command=\x22%s\x22/></item>\n' ${TCEDIR}/ondemand/${APP} >> $TMP
+    printf 'command=\x22%s\x22/></item><!--labwc-->\n' ${TCEDIR}/ondemand/${APP} >> $TMP
   done
   cat $TMP > $OUTFILE
   rm -f $TMP

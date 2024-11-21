@@ -17,6 +17,7 @@
   </menu>
   <separator/>
   <item label="Reconfigure"><action name="Reconfigure" /></item>
-  <item label="Exit"><action name="Exit" /></item>
+  <item label="Exit Labwc"><action name="Exit" /></item>
+  <item label="Exit TC"><action name="Execute" command="exittc" /></item>
 </menu>
 </labwc_menu>

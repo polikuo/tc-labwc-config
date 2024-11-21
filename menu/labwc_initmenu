@@ -3,8 +3,7 @@
 # DESKTOP_initmenu file
 # Typically called from /usr/local/bin/setupdesktop
 # Which is called by /usr/local/tce.installed/Xprogs and /usr/local/bin/startx
-# That makes no sense for wayland
-# This script was written in case someday we'll need it
+# Generate menu onboot
 
 TCUSER=$(cat /etc/sysconfig/tcuser 2> /dev/null) || TCUSER="tc"
 CONFIG=/home/${TCUSER}/.config/labwc
@@ -26,6 +25,11 @@ if [ -d $CONFIG ]; then
 else
   cp -Lr $SOURCE $CONFIG
 fi
+
+for D in /usr/local/share/applications/*.desktop; do
+  D=$(basename $D)
+  labwc_makemenu ${D%.desktop}
+done
 
 labwc_ondemand
 

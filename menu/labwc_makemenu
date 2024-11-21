@@ -23,26 +23,29 @@ fi
 FREEDESK="/usr/local/share/applications"
 
 case $1 in
-  tinycore*.desktop ) exit 0;;
+  tinycore-* ) rm -f $OUTFILE $CACHE && exit 0;;
 esac
 
-if [ -e "$FREEDESK"/"$1".desktop ]; then
-  if ! grep -i windowmanager "$FREEDESK"/"$1".desktop; then
-    if [ -e "$FREEDESK"/"$1"~1.desktop ]; then
+grep "$1" /home/${TCUSER}/.config/labwc/exclude && rm -f $OUTFILE $CACHE && exit 0
+
+if [ -e "${FREEDESK}/${1}.desktop" ]; then
+  if ! grep -i windowmanager "${FREEDESK}/${1}.desktop"; then
+    if [ -e "${FREEDESK}/${1}~1.desktop" ]; then
       echo "<menu id=\"$1\" label=\"$1\"><!--labwc-->" > "$OUTFILE"
       for F in $(ls "$FREEDESK"/* | grep -E "$1"'(~[1-9][1-9]*)*'.desktop); do
         labwc_writeMenuItem "$F" >> "$OUTFILE"
       done
       echo "</menu><!--labwc-->" >> "$OUTFILE"
     else
-      labwc_writeMenuItem  "$FREEDESK"/"$1".desktop >> "$OUTFILE"
+      labwc_writeMenuItem "${FREEDESK}/${1}.desktop" >> "$OUTFILE"
     fi
     labwc_append "$OUTFILE" "$TCEMENU" > "$CACHE"
     # use cat to prevent root from messing around the permission
     cat "$CACHE" > "$TCEMENU"
-    rm -f $OUTFILE $CACHE
   fi
 fi
+
+rm -f $OUTFILE $CACHE
 
 # Typically called by /usr/bin/tce-load
 # This is just a fail safe
