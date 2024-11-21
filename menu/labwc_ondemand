@@ -15,9 +15,9 @@ create_entry() {
   local TMP=$(mktemp)
   awk '{
     if($0 ~ /menu.*id.*System.*label.*System Tools/){
-      print "  <menu id=\"ondemand-menu\" label=\"OnDemand\">"
-      print "  </menu>"
-      print "  <separator/>"
+      print "  <menu id=\"ondemand-menu\" label=\"OnDemand\"><!--labwc-->"
+      print "  </menu><!--labwc-->"
+      print "  <separator/><!--labwc-->"
     }
     print
   }' $TCEMENU > $TMP
@@ -37,9 +37,6 @@ create_items() {
   rm -f $TMP
 }
 
-# check entry
-grep -qi "ondemand-menu" $TCEMENU || create_entry
-
 if [ $1 ]; then
   # append mode
   create_items $1
@@ -48,8 +45,13 @@ else
   create_items $(busybox ls ${TCEDIR}/ondemand)
 fi
 
-ONDEMAND=1 labwc_append "$OUTFILE" "$TCEMENU" > $CACHE
-cat $CACHE > $TCEMENU
+if [ -s $OUTFILE ]; then
+  # check entry
+  grep -qi "ondemand-menu" $TCEMENU || create_entry
+  ONDEMAND=1 labwc_append "$OUTFILE" "$TCEMENU" > $CACHE
+  cat $CACHE > $TCEMENU
+fi
+
 rm -f $OUTFILE $CACHE
 
 # Typically called by /usr/bin/ondemand
