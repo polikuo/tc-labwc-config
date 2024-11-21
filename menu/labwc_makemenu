@@ -1,0 +1,50 @@
+#!/bin/sh
+# (c) polikuo 2024
+# Typically called from /usr/local/bin/desktop.sh
+# $ labwc_makemenu APPNAME
+# ideally, this script should not be called by root
+# however, it should be fine
+
+. /etc/init.d/tc-functions
+
+[ "$1" ] || exit 1
+[ "$USER" ] || USER=$(cat /etc/sysconfig/tcuser) || USER="tc"
+
+TCEMENU=/home/${USER}/.config/labwc/menu.xml
+OUTFILE=$(mktemp)
+CACHE=$(mktemp)
+
+unset ONDEMAND
+
+if [ "$1" = "labwc" -o "$1" = "labwc-menu-generator" ]; then
+  exit 0
+fi
+
+# Check for freedesktop item                       
+FREEDESK="/usr/local/share/applications"
+
+case $1 in
+  tinycore*.desktop ) exit 0;;
+esac
+
+if [ -e "$FREEDESK"/"$1".desktop ]; then
+  if ! grep -i windowmanager "$FREEDESK"/"$1".desktop; then
+    if [ -e "$FREEDESK"/"$1"~1.desktop ]; then
+      echo "<menu id=\"$1\" label=\"$1\"><!--labwc-->" > "$OUTFILE"
+      for F in $(ls "$FREEDESK"/* | grep -E "$1"'(~[1-9][1-9]*)*'.desktop); do
+        labwc_writeMenuItem "$F" >> "$OUTFILE"
+      done
+      echo "</menu><!--labwc-->" >> "$OUTFILE"
+    else
+      labwc_writeMenuItem  "$FREEDESK"/"$1".desktop >> "$OUTFILE"
+    fi
+    labwc_append "$OUTFILE" "$TCEMENU" > "$CACHE"
+    # use cat to prevent root from messing around the permission
+    cat "$CACHE" > "$TCEMENU"
+    rm -f $OUTFILE $CACHE
+  fi
+fi       
+   
+# Typically called by /usr/bin/tce-load
+# This is just a fail safe
+labwc_restart

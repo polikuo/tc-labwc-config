@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<labwc_config>
+  <placement>
+    <policy>automatic</policy>
+  </placement>
+  <desktops number="4" />
+  <keyboard>
+    <keybind key="W-1"><action name="GoToDesktop" to="1" /></keybind>
+    <keybind key="W-2"><action name="GoToDesktop" to="2" /></keybind>
+    <keybind key="W-3"><action name="GoToDesktop" to="3" /></keybind>
+    <keybind key="W-4"><action name="GoToDesktop" to="4" /></keybind>
+  </keyboard>
+</labwc_config>

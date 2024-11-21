@@ -1,0 +1,56 @@
+#!/bin/sh
+# (c) polikuo 2024
+# can be called as root or as tcuser
+# Typically called in two ways (with/without args)
+# append mode: labwc_ondemand APP
+# scan mode: labwc_ondemand
+
+TCUSER=$(cat /etc/sysconfig/tcuser 2> /dev/null) || TCUSER="tc"
+TCEDIR=/etc/sysconfig/tcedir
+TCEMENU=/home/${TCUSER}/.config/labwc/menu.xml
+OUTFILE=$(mktemp)
+CACHE=$(mktemp)
+
+create_entry() {
+  local TMP=$(mktemp)
+  awk '{
+    if($0 ~ /menu.*id.*System.*label.*System Tools/){
+      print "  <menu id=\"ondemand-menu\" label=\"OnDemand\">"
+      print "  </menu>"
+      print "  <separator/>"
+    }
+    print
+  }' $TCEMENU > $TMP
+  cat $TMP > $TCEMENU
+  rm -f $TMP
+}
+
+create_items() {
+  local TMP=$(mktemp) APP
+  for APP in $@; do
+    [ $APP = "Xprogs" -o $APP = "Wprogs" ] && continue
+    printf '<item label=\x22%s\x22><action name=\x22Execute\x22 ' $APP >> $TMP
+    printf 'command=\x22%s\x22/></item>\n' ${TCEDIR}/ondemand/${APP} >> $TMP
+  done
+  cat $TMP > $OUTFILE
+  rm -f $TMP
+}
+
+# check entry
+grep -qi "ondemand-menu" $TCEMENU || create_entry
+
+if [ $1 ]; then
+  # append mode
+  create_items $1
+else
+  # scan mode
+  create_items $(busybox ls ${TCEDIR}/ondemand)
+fi
+
+ONDEMAND=1 labwc_append "$OUTFILE" "$TCEMENU" > $CACHE
+cat $CACHE > $TCEMENU
+rm -f $OUTFILE $CACHE
+
+# Typically called by /usr/bin/ondemand
+# This is just a fail safe
+labwc_restart

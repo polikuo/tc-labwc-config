@@ -1,0 +1,44 @@
+#!/usr/bin/awk -f
+# this_script data template
+BEGIN {
+  menu = "menu"
+  id = "Programs"
+  label = "Applications"
+  if (ENVIRON["ONDEMAND"]) {
+    id = "ondemand-menu"
+    label = "OnDemand"
+  }
+  # indentation of the item tag
+  item = 4
+  line = 0
+  append = 0
+  extra = 0
+  data[line] = ""
+  if (ARGC != 3) exit 1
+}
+FILENAME == ARGV[1] {
+  data[FNR] = $0
+  line = FNR
+}
+FILENAME == ARGV[2] {
+  if (append) {
+    indent = match($0, /[^ ]/)
+    if (indent < item) {
+      append = 0
+      for (l = 1; l <= line; l++) {
+        if (data[l] ~ /^<\/menu/) extra -= 2
+        for (i = 1; i <= item + extra; i++) printf " "
+        print data[l]
+        if (data[l] ~ /^<menu/) extra += 2
+      }
+    }
+  }
+  if ($0 ~ menu && $0 ~ id && $0 ~ label) append = 1
+  print
+}
+END {
+  if (ARGC != 3) {
+    print "this_script data template"
+    exit 1
+  }
+}

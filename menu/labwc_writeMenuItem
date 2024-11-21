@@ -1,0 +1,45 @@
+#!/usr/bin/awk -f
+# (c) polikuo 2024
+function trim(R) {
+  gsub(/^[[:space:]]*/, "", R)
+  gsub(/[[:space:]]*$/, "", R)
+  return R
+}
+BEGIN {
+  FS = "="
+  T = "havoc"
+  if(ARGC!=2) exit 1
+}
+$1 == "Name" {
+  name = $2
+  gsub(/ /, "_", name)
+}
+$1 == "Exec" {
+  run = substr($0, index($0, $2))
+  arg = match(run, "%")
+  if(arg) run = substr(run, 0, arg - 2)
+  if(run ~ /cliorx/) {
+    cliorx = 1
+    gsub(/cliorx/, "", run)
+  }
+  run = trim(run)
+}
+$1 == "Terminal" {
+  terminal = $2
+}
+END {
+  if(ARGC==1) {
+    print "No *.desktop file specified..."
+    exit 1
+  }
+  if(ARGC>2) {
+    print "Too many arguements..."
+    exit 1
+  }
+  if (cliorx) terminal = "true"
+  if ( terminal == "true" ) {
+    print "<item label=\""name"\"><action name=\"Execute\" command=\"" T , run "\"/></item><!--labwc-->"
+  } else {
+    print "<item label=\""name"\"><action name=\"Execute\" command=\"" run "\"/></item><!--labwc-->"
+  }
+}

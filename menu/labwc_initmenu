@@ -1,0 +1,33 @@
+#!/bin/sh
+# (c) polikuo 2024
+# DESKTOP_initmenu file
+# Typically called from /usr/local/bin/setupdesktop
+# Which is called by /usr/local/tce.installed/Xprogs and /usr/local/bin/startx
+# That makes no sense for wayland
+# This script was written in case someday we'll need it
+
+TCUSER=$(cat /etc/sysconfig/tcuser 2> /dev/null) || TCUSER="tc"
+CONFIG=/home/${TCUSER}/.config/labwc
+TCEMENU=${CONFIG}/menu.xml
+SOURCE=/usr/local/share/labwc
+
+if [ -d $CONFIG ]; then
+  if [ -s $TCEMENU ]; then
+    # usually called during boot
+    # remove entries from previous session
+    CACHE=$(mktemp)
+    awk '!/<!--labwc-->/' $TCEMENU > $CACHE
+    cat $CACHE > $TCEMENU
+    rm -f $CACHE
+  else
+    # likely deleted by the user
+    cp -Lf ${SOURCE}/* $CONFIG
+  fi
+else
+  cp -Lr $SOURCE $CONFIG
+fi
+
+labwc_ondemand
+
+chown "${TCUSER}:staff" -R $CONFIG
+chmod g+w -R $CONFIG

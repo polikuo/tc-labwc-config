@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<labwc_menu>
+<menu id="root-menu" label="TinyCore">
+  <separator label="TinyCoreLinux" />
+  <menu id="Programs" label="Applications">
+    <item label="Terminal"><action name="Execute" command="havoc" /></item>
+  </menu>
+  <separator/>
+  <menu id="System" label="System Tools">
+    <item label="Apps"><action name="Execute" command="apps" /></item>
+    <item label="Control Panel"><action name="Execute" command="cpanel" /></item>
+    <item label="Editor"><action name="Execute" command="editor" /></item>
+    <item label="Run Program"><action name="Execute" command="flrun" /></item>
+    <item label="Services"><action name="Execute" command="services" /></item>
+    <item label="Set Time"><action name="Execute" command="datetool" /></item>
+    <item label="Top"><action name="Execute" command="havoc top" /></item>
+  </menu>
+  <separator/>
+  <item label="Reconfigure"><action name="Reconfigure" /></item>
+  <item label="Exit"><action name="Exit" /></item>
+</menu>
+</labwc_menu>
