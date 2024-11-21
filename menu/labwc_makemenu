@@ -23,10 +23,14 @@ fi
 FREEDESK="/usr/local/share/applications"
 
 case $1 in
-  tinycore-* ) rm -f $OUTFILE $CACHE && exit 0;;
+  tinycore-* ) SKIP=1;;
+  havoc ) SKIP=1;;
 esac
 
-grep "$1" /home/${TCUSER}/.config/labwc/exclude && rm -f $OUTFILE $CACHE && exit 0
+# exclude exact match
+awk -v str="$1" '$0 == str' /home/${TCUSER}/.config/labwc/exclude && SKIP=1
+
+[ $SKIP ] && rm -f $OUTFILE $CACHE && exit 0
 
 if [ -e "${FREEDESK}/${1}.desktop" ]; then
   if ! grep -i windowmanager "${FREEDESK}/${1}.desktop"; then
