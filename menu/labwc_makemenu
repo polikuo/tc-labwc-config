@@ -8,9 +8,8 @@
 . /etc/init.d/tc-functions
 
 [ "$1" ] || exit 1
-[ "$USER" ] || USER=$(cat /etc/sysconfig/tcuser) || USER="tc"
-
-TCEMENU=/home/${USER}/.config/labwc/menu.xml
+TCUSER=$(cat /etc/sysconfig/tcuser 2> /dev/null) || TCUSER="tc"
+TCEMENU=/home/${TCUSER}/.config/labwc/menu.xml
 OUTFILE=$(mktemp)
 CACHE=$(mktemp)
 
@@ -20,7 +19,7 @@ if [ "$1" = "labwc" -o "$1" = "labwc-menu-generator" ]; then
   exit 0
 fi
 
-# Check for freedesktop item                       
+# Check for freedesktop item
 FREEDESK="/usr/local/share/applications"
 
 case $1 in
@@ -43,8 +42,8 @@ if [ -e "$FREEDESK"/"$1".desktop ]; then
     cat "$CACHE" > "$TCEMENU"
     rm -f $OUTFILE $CACHE
   fi
-fi       
-   
+fi
+
 # Typically called by /usr/bin/tce-load
 # This is just a fail safe
 labwc_restart
