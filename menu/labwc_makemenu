@@ -25,23 +25,35 @@ FREEDESK="/usr/local/share/applications"
 case $1 in
   tinycore-* ) SKIP=1;;
   havoc ) SKIP=1;;
+  *~[0-9]* ) SKIP=1;;
 esac
 
 # exclude exact match
-awk -v str="$1" '$0 == str' /home/${TCUSER}/.config/labwc/exclude && SKIP=1
+EXCLUDE=$(awk -v str="$1" '$0 == str ".desktop"' /home/${TCUSER}/.config/labwc/exclude)
+if [ -n "$EXCLUDE" ]; then
+  SKIP=1
+fi
 
 [ $SKIP ] && rm -f $OUTFILE $CACHE && exit 0
 
 if [ -e "${FREEDESK}/${1}.desktop" ]; then
   if ! grep -i windowmanager "${FREEDESK}/${1}.desktop"; then
     if [ -e "${FREEDESK}/${1}~1.desktop" ]; then
-      echo "<menu id=\"$1\" label=\"$1\"><!--labwc-->" > "$OUTFILE"
-      for F in $(ls "$FREEDESK"/* | grep -E "$1"'(~[1-9][1-9]*)*'.desktop); do
-        labwc_writeMenuItem "$F" >> "$OUTFILE"
-      done
-      echo "</menu><!--labwc-->" >> "$OUTFILE"
+      LIST=$(ls ${FREEDESK}/* |
+        grep -E "/${1}(~[0-9][0-9]*)*\.desktop" |
+        grep -Fvf /home/${TCUSER}/.config/labwc/exclude
+      )
+      if [ $(echo "$LIST" | wc -l) -gt 1 ]; then
+        echo "<menu id=\"$1\" label=\"$1\"><!--labwc-->" > "$OUTFILE"
+        for F in $LIST; do
+          labwc_writeMenuItem "$F" >> "$OUTFILE"
+        done
+        echo "</menu><!--labwc-->" >> "$OUTFILE"
+      else
+        labwc_writeMenuItem $LIST > "$OUTFILE"
+      fi
     else
-      labwc_writeMenuItem "${FREEDESK}/${1}.desktop" >> "$OUTFILE"
+      labwc_writeMenuItem "${FREEDESK}/${1}.desktop" > "$OUTFILE"
     fi
     labwc_append "$OUTFILE" "$TCEMENU" > "$CACHE"
     # use cat to prevent root from messing around the permission
