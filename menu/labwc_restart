@@ -1,2 +1,11 @@
 #!/bin/sh
+
+LABWC_PID=$(echo $(cat /tmp/.X0-lock 2> /dev/null))
+
+if [ -z "$LABWC_PID" ]; then
+  LABWC_PID=$(ps -o comm,pid | awk '$1=="labwc"{print $2}')
+fi
+
+export LABWC_PID
+
 labwc -r
